@@ -1,7 +1,7 @@
 #!/usr/bin/env bash
 # Google Workspace Audit Script (Read-Only)
 # Usage: ./gw_full_audit.sh <CUSTOMER_ID> <PRIMARY_DOMAIN> <ADMIN_EMAIL>
-# Requires: gcloud CLI, a service account with domain-wide delegation + read-only scopes
+# Requires: gcloud CLI, either a service account key OR impersonation setup
 
 set -euo pipefail
 
@@ -11,8 +11,13 @@ ADMIN_EMAIL="$3"      # e.g. admin@example.com
 
 # Get the access token
 get_token() {
-  gcloud auth application-default print-access-token \
-    --impersonate-service-account="$(jq -r .client_email < "$GOOGLE_APPLICATION_CREDENTIALS")"
+  # Prefer impersonation if configured
+  if [[ -n "${IMPERSONATE_SERVICE_ACCOUNT:-}" ]]; then
+    gcloud auth application-default print-access-token \
+      --impersonate-service-account="$IMPERSONATE_SERVICE_ACCOUNT"
+  else
+    gcloud auth application-default print-access-token
+  fi
 }
 
 # Simple GET wrapper
@@ -29,11 +34,6 @@ TOKEN=$(get_token)
 echo "• Users"
 api "https://admin.googleapis.com/admin/directory/v1/users?customer=${CUST_ID}&maxResults=500&fields=users(id,email,suspended,lastLoginTime)" \
   | jq '.users' > gw-reports/users_${stamp}.json
-
-# --- LICENSES (optional; safe to skip if scope not available) ---
-# echo "• Licenses"
-# api "https://licensing.googleapis.com/apps/licensing/v1/product/Google-Workspace/subscriptions" \
-#   | jq '.subscriptions[] | {skuId, seats: .seats.licensedNumber}' > gw-reports/licenses_${stamp}.json
 
 # --- ADMIN ROLES ---
 echo "• Admin Roles"
@@ -86,4 +86,4 @@ echo "• Alert Center"
 api "https://alertcenter.googleapis.com/v1beta1/alerts?pageSize=100" \
   | jq '.alerts' > gw-reports/alerts_${stamp}.json
 
-echo "✅ Done. Reports saved to ./gw-reports/"
+echo "Done. Reports saved to ./gw-reports/"
