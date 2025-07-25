@@ -54,7 +54,7 @@ api "https://admin.googleapis.com/admin/reports/v1/usage/users/all/dates/${today
 # DRIVE & GMAIL STORAGE USAGE
 echo "• Storage"
 api "https://admin.googleapis.com/admin/reports/v1/usage/customers/dates/${today}?parameters=gmail:num_emails_total,drive:total_bytes,photos:total_bytes" \
-  | jq '.usageReports[0].parameters' > gw-reports/storage_${stamp}.json
+| jq '.usageReports[0].parameters // {}' > gw-reports/storage_${stamp}.json
 
 # DRIVE SHARING
 echo "• Drive External Sharing"
