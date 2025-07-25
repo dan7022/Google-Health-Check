@@ -41,8 +41,9 @@ api "https://admin.googleapis.com/admin/directory/v1/customer/${CUST_ID}/orgunit
 echo "• Admin Roles"
 api "https://admin.googleapis.com/admin/directory/v1/customer/${CUST_ID}/roles" \
   | jq '.items' > gw-reports/admin_roles_${stamp}.json
-api "https://admin.googleapis.com/admin/directory/v1/customer/${CUST_ID}/roleassignments?maxResults=200" \
+api "https://admin.googleapis.com/admin/directory/v1/roleassignments?customer=${CUST_ID}&maxResults=200" \
   | jq '.items // []' > gw-reports/role_assignments_${stamp}.json
+
 
 # MFA & 2SV
 echo "• MFA Status"
