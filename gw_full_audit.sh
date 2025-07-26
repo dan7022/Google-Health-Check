@@ -15,14 +15,10 @@ mkdir -p gw-reports
 # 1) ACCESS-TOKEN HANDLING (supports service-account impersonation)
 ########################################################################
 get_token() {
-  if [[ -n "${IMPERSONATE_SERVICE_ACCOUNT:-}" ]]; then
-    gcloud auth application-default print-access-token \
-      --impersonate-service-account="$IMPERSONATE_SERVICE_ACCOUNT"
-  else
-    gcloud auth application-default print-access-token
-  fi
+  oauth2l fetch --json "$SA_KEY_JSON" \
+     --scope "https://www.googleapis.com/auth/cloud-platform" \
+     --jwt --email "$ADMIN_EMAIL"
 }
-TOKEN="$(get_token)"
 
 ########################################################################
 # 2) CURL WRAPPER – fails loudly if HTTP != 200 so jq never sees HTML
