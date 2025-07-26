@@ -14,10 +14,25 @@ mkdir -p gw-reports
 ########################################################################
 # 1) ACCESS-TOKEN HANDLING (supports service-account impersonation)
 ########################################################################
+SA_KEY_JSON="$HOME/audit-sa-key.json"          # path to your key file
 get_token() {
   oauth2l fetch --json "$SA_KEY_JSON" \
-     --scope "https://www.googleapis.com/auth/cloud-platform" \
-     --jwt --email "$ADMIN_EMAIL"
+      --jwt --email "$ADMIN_EMAIL" \
+      --scope \
+"https://www.googleapis.com/auth/admin.directory.user.readonly \
+ https://www.googleapis.com/auth/admin.directory.group.readonly \
+ https://www.googleapis.com/auth/admin.directory.rolemanagement.readonly \
+ https://www.googleapis.com/auth/admin.reports.usage.readonly \
+ https://www.googleapis.com/auth/admin.reports.audit.readonly \
+ https://www.googleapis.com/auth/admin.directory.orgunit.readonly \
+ https://www.googleapis.com/auth/admin.directory.device.chromeos.readonly \
+ https://www.googleapis.com/auth/admin.directory.user.security \
+ https://www.googleapis.com/auth/apps.alerts \
+ https://www.googleapis.com/auth/gmail.settings.basic \
+ https://www.googleapis.com/auth/gmail.readonly \
+ https://www.googleapis.com/auth/drive.readonly \
+ https://www.googleapis.com/auth/chrome.management.policy.readonly \
+ https://www.googleapis.com/auth/apps.groups.settings"
 }
 
 ########################################################################
